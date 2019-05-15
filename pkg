@@ -1,0 +1,133 @@
+#!/bin/sh
+
+## CONFIGURATION #######################
+# Please define your init system.
+# Possible values are:
+#   - runit
+#   - systemd
+INIT_SYSTEM="runit"
+# Please define your package manager.
+# Possible values are:
+#   - pacman
+#   - xbps
+#   - yum
+PACKAGE_MANAGER="xbps"
+########################################
+
+run_command () {
+    cmd=$(echo $1 | sed "s/{}/$2/g")
+    echo "=> $cmd"
+    $cmd
+}
+
+main () {
+    if [ "$0" != "pkg" ] && [ "$0" != "srv" ] && [ "$0" = "sys" ]; then
+        echo "This script should be called as pkg, srv or sys."
+        exit 2
+    fi
+
+    if [ "$INIT_SYSTEM" != "runit" ] && [ "$INIT_SYSTEM" != "systemd" ]; then
+        echo "Init system not supported."
+        exit 3
+    fi
+
+    if [ "$PACKAGE_MANAGER" != "pacman" ] && [ "$PACKAGE_MANAGER" != "xbps" ] && [ "$PACKAGE_MANAGER" != "yum" ]; then
+        echo "Package manager not supported."
+        exit 4
+    fi
+
+    if [ "$1" = "" ]; then
+        if [ "$0" = "pkg" ]; then
+            echo "Usage: $0 search|install|uninstall|update [package]"
+        elif [ "$0" = "srv" ]; then
+            echo "Usage: $0 start|stop|enable|disable service"
+        elif [ "$0" = "sys" ]; then
+            echo "Usage: $0 standby|hibernate|poweroff|reboot"
+        fi
+        exit 1
+    fi
+
+    if echo "$0" | grep -qE "(.*/)?pkg"; then
+        if [ "$PACKAGE_MANAGER" = "pacman" ]; then
+            CMD_INSTALL="pacman -S {}"
+            CMD_SEARCH="pacman -Ss {}"
+            CMD_UNINSTALL="pacman -Rss {}"
+            CMD_UPDATE="pacman -Syu"
+        elif [ "$PACKAGE_MANAGER" = "xbps" ]; then
+            CMD_INSTALL="xbps-install {}"
+            CMD_SEARCH="xbps-query -Rs {}"
+            CMD_UNINSTALL="xbps-remove {}"
+            CMD_UPDATE="xbps-install -Su"
+        elif [ "$PACKAGE_MANAGER" = "yum" ]; then
+            CMD_INSTALL="yum install {}"
+            CMD_SEARCH="yum search {}"
+            CMD_UNINSTALL="yum remove {}"
+            CMD_UPDATE="yum update"
+        fi
+
+        if [ "$1" = "install" ]; then
+            run_command "$CMD_INSTALL" "$2"
+        elif [ "$1" = "search" ]; then
+            run_command "$CMD_SEARCH" "$2"
+        elif [ "$1" = "uninstall" ]; then
+            run_command "$CMD_UNINSTALL" "$2"
+        elif [ "$1" = "update" ]; then
+            run_command "$CMD_UPDATE"
+        else
+            echo "Unknown command: $1"
+            exit 5
+        fi
+    elif echo "$0" | grep -qE "(.*/)?srv"; then
+        if [ "$INIT_SYSTEM" = "runit" ]; then
+            CMD_DISABLE="rm /var/service/{}"
+            CMD_ENABLE="ln -s /etc/sv/{} /var/service/"
+            CMD_START="sv start {}"
+            CMD_STOP="sv stop {}"
+        elif [ "$INIT_SYSTEM" = "systemd" ]; then
+            CMD_DISABLE="systemctl disable {}"
+            CMD_ENABLE="systemctl enable {}"
+            CMD_START="systemctl start {}"
+            CMD_STOP="systemctl stop {}"
+        fi
+
+        if [ "$1" = "disable" ]; then
+            run_command "$CMD_DISABLE" "$2" 
+        elif [ "$1" = "enable" ]; then
+            run_command "$CMD_ENABLE" "$2" 
+        elif [ "$1" = "start" ]; then
+            run_command "$CMD_START" "$2" 
+        elif [ "$1" = "stop" ]; then
+            run_command "$CMD_STOP" "$2" 
+        else
+            echo "Unknown command: $1"
+            exit 5
+        fi
+    elif echo "$0" | grep -qE "(.*/)?sys"; then
+        if [ "$INIT_SYSTEM" = "runit" ]; then
+            CMD_POWEROFF="poweroff"
+            CMD_REBOOT="reboot"
+            CMD_STANDBY="zzz"
+            CMD_HIBERNATE="ZZZ"
+        elif [ "$INIT_SYSTEM" = "systemd" ]; then
+            CMD_POWEROFF="systemctl poweroff"
+            CMD_REBOOT="systemctl reboot"
+            CMD_STANDBY="systemctl suspend"
+            CMD_HIBERNATE="systemctl hibernate"
+        fi
+
+        if [ "$1" = "poweroff" ]; then
+            run_command "$CMD_POWEROFF" 
+        elif [ "$1" = "reboot" ]; then
+            run_command "$CMD_REBOOT" 
+        elif [ "$1" = "standby" ]; then
+            run_command "$CMD_STANDBY" 
+        elif [ "$1" = "hibernate" ]; then
+            run_command "$CMD_HIBERNATE" 
+        else
+            echo "Unknown command: $1"
+            exit 5
+        fi
+    fi
+}
+
+main $*
