@@ -47,6 +47,20 @@ main () {
         exit 1
     fi
 
+    if [ "$0" = "pkg" ];then
+        possible_commands="install\nsearch\nuninstall\nupdate"
+    elif [ "$0" = "srv" ]; then
+        possible_commands="start\nstop\nenable\ndisable"
+    elif [ "$0" = "sys" ]; then
+        echo "Usage: $0 standby|hibernate|poweroff|reboot"
+    fi
+
+    cmd=$(echo -e "install\nsearch\nuninstall\nupdate" | grep -E "^$1")
+    if [ $(echo $cmd | wc -l) != "1" ]; then
+        echo "Didn't recognise command: $1"
+        exit 3
+    fi
+
     if echo "$0" | grep -qE "(.*/)?pkg"; then
         if [ "$PACKAGE_MANAGER" = "pacman" ]; then
             CMD_INSTALL="pacman -S {}"
@@ -65,13 +79,13 @@ main () {
             CMD_UPDATE="yum update"
         fi
 
-        if [ "$1" = "install" ]; then
+        if [ "$cmd" = "install" ]; then
             run_command "$CMD_INSTALL" "$2"
-        elif [ "$1" = "search" ]; then
+        elif [ "$cmd" = "search" ]; then
             run_command "$CMD_SEARCH" "$2"
-        elif [ "$1" = "uninstall" ]; then
+        elif [ "$cmd" = "uninstall" ]; then
             run_command "$CMD_UNINSTALL" "$2"
-        elif [ "$1" = "update" ]; then
+        elif [ "$cmd" = "update" ]; then
             run_command "$CMD_UPDATE"
         else
             echo "Unknown command: $1"
