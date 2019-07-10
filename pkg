@@ -38,7 +38,7 @@ main () {
 
     if [ "$1" = "" ]; then
         if [ "$0" = "pkg" ]; then
-            echo "Usage: $0 search|install|uninstall|update [package]"
+            echo "Usage: $0 search|install|remove|update [package]"
         elif [ "$0" = "srv" ]; then
             echo "Usage: $0 start|stop|enable|disable service"
         elif [ "$0" = "sys" ]; then
@@ -48,14 +48,14 @@ main () {
     fi
 
     if [ "$0" = "pkg" ];then
-        possible_commands="install\nsearch\nuninstall\nupdate"
+        possible_commands="install\nremove\nsearch\nupdate"
     elif [ "$0" = "srv" ]; then
         possible_commands="start\nstop\nenable\ndisable"
     elif [ "$0" = "sys" ]; then
         echo "Usage: $0 standby|hibernate|poweroff|reboot"
     fi
 
-    cmd=$(echo -e "install\nsearch\nuninstall\nupdate" | grep -E "^$1")
+    cmd=$(echo -e "install\nremove\nsearch\nupdate" | grep -E "^$1")
     if [ $(echo $cmd | wc -l) != "1" ]; then
         echo "Didn't recognise command: $1"
         exit 3
@@ -83,7 +83,7 @@ main () {
             run_command "$CMD_INSTALL" "$2"
         elif [ "$cmd" = "search" ]; then
             run_command "$CMD_SEARCH" "$2"
-        elif [ "$cmd" = "uninstall" ]; then
+        elif [ "$cmd" = "remove" ]; then
             run_command "$CMD_UNINSTALL" "$2"
         elif [ "$cmd" = "update" ]; then
             run_command "$CMD_UPDATE"
