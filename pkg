@@ -15,7 +15,7 @@ PACKAGE_MANAGER="xbps"
 ########################################
 
 run_command () {
-    cmd=$(echo $1 | sed "s/{}/$2/g")
+    cmd=$(echo "$1" | sed "s/{}/$2/g")
     echo "=> $cmd"
     $cmd
 }
