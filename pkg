@@ -105,13 +105,13 @@ main () {
             CMD_STOP="systemctl stop {}"
         fi
 
-        if [ "$1" = "disable" ]; then
+        if [ "$cmd" = "disable" ]; then
             run_command "$CMD_DISABLE" "$2" 
-        elif [ "$1" = "enable" ]; then
+        elif [ "$cmd" = "enable" ]; then
             run_command "$CMD_ENABLE" "$2" 
-        elif [ "$1" = "start" ]; then
+        elif [ "$cmd" = "start" ]; then
             run_command "$CMD_START" "$2" 
-        elif [ "$1" = "stop" ]; then
+        elif [ "$cmd" = "stop" ]; then
             run_command "$CMD_STOP" "$2" 
         else
             echo "Unknown command: $1"
@@ -130,13 +130,13 @@ main () {
             CMD_HIBERNATE="systemctl hibernate"
         fi
 
-        if [ "$1" = "poweroff" ]; then
+        if [ "$cmd" = "poweroff" ]; then
             run_command "$CMD_POWEROFF" 
-        elif [ "$1" = "reboot" ]; then
+        elif [ "$cmd" = "reboot" ]; then
             run_command "$CMD_REBOOT" 
-        elif [ "$1" = "standby" ]; then
+        elif [ "$cmd" = "standby" ]; then
             run_command "$CMD_STANDBY" 
-        elif [ "$1" = "hibernate" ]; then
+        elif [ "$cmd" = "hibernate" ]; then
             run_command "$CMD_HIBERNATE" 
         else
             echo "Unknown command: $1"
