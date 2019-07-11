@@ -56,8 +56,8 @@ main () {
         echo "Usage: $script standby|hibernate|poweroff|reboot"
     fi
 
-    cmd=$(echo -e "install\nremove\nsearch\nupdate" | grep -E "^$1")
-    if [ $(echo $cmd | wc -l) != "1" ]; then
+    cmd=$(printf "%b" "$possible_commands" | grep -E "^$1")
+    if [ "$(echo "$cmd" | wc -l)" != "1" ]; then
         echo "Didn't recognise command: $1"
         exit 3
     fi
