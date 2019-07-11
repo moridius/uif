@@ -21,7 +21,8 @@ run_command () {
 }
 
 main () {
-    if [ "$0" != "pkg" ] && [ "$0" != "srv" ] && [ "$0" = "sys" ]; then
+    script=$(basename -- "$0")
+    if [ "$script" != "pkg" ] && [ "$script" != "srv" ] && [ "$script" != "sys" ]; then
         echo "This script should be called as pkg, srv or sys."
         exit 2
     fi
@@ -37,22 +38,22 @@ main () {
     fi
 
     if [ "$1" = "" ]; then
-        if [ "$0" = "pkg" ]; then
-            echo "Usage: $0 search|install|remove|update [package]"
-        elif [ "$0" = "srv" ]; then
-            echo "Usage: $0 start|stop|enable|disable service"
-        elif [ "$0" = "sys" ]; then
-            echo "Usage: $0 standby|hibernate|poweroff|reboot"
+        if [ "$script" = "pkg" ]; then
+            echo "Usage: $script search|install|remove|update [package]"
+        elif [ "$script" = "srv" ]; then
+            echo "Usage: $script start|stop|enable|disable service"
+        elif [ "$script" = "sys" ]; then
+            echo "Usage: $script standby|hibernate|poweroff|reboot"
         fi
         exit 1
     fi
 
-    if [ "$0" = "pkg" ];then
+    if [ "$script" = "pkg" ]; then
         possible_commands="install\nremove\nsearch\nupdate"
-    elif [ "$0" = "srv" ]; then
+    elif [ "$script" = "srv" ]; then
         possible_commands="start\nstop\nenable\ndisable"
-    elif [ "$0" = "sys" ]; then
-        echo "Usage: $0 standby|hibernate|poweroff|reboot"
+    elif [ "$script" = "sys" ]; then
+        echo "Usage: $script standby|hibernate|poweroff|reboot"
     fi
 
     cmd=$(echo -e "install\nremove\nsearch\nupdate" | grep -E "^$1")
@@ -61,7 +62,7 @@ main () {
         exit 3
     fi
 
-    if echo "$0" | grep -qE "(.*/)?pkg"; then
+    if [ "$script" = "pkg" ]; then
         if [ "$PACKAGE_MANAGER" = "pacman" ]; then
             CMD_INSTALL="pacman -S {}"
             CMD_SEARCH="pacman -Ss {}"
@@ -91,7 +92,7 @@ main () {
             echo "Unknown command: $1"
             exit 5
         fi
-    elif echo "$0" | grep -qE "(.*/)?srv"; then
+    elif [ "$script" = "srv" ]; then
         if [ "$INIT_SYSTEM" = "runit" ]; then
             CMD_DISABLE="rm /var/service/{}"
             CMD_ENABLE="ln -s /etc/sv/{} /var/service/"
@@ -116,7 +117,7 @@ main () {
             echo "Unknown command: $1"
             exit 5
         fi
-    elif echo "$0" | grep -qE "(.*/)?sys"; then
+    elif [ "$script" = "sys" ]; then
         if [ "$INIT_SYSTEM" = "runit" ]; then
             CMD_POWEROFF="poweroff"
             CMD_REBOOT="reboot"
