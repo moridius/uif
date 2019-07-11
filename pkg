@@ -24,17 +24,17 @@ main () {
     script=$(basename -- "$0")
     if [ "$script" != "pkg" ] && [ "$script" != "srv" ] && [ "$script" != "sys" ]; then
         echo "This script should be called as pkg, srv or sys."
-        exit 2
+        exit 1
     fi
 
     if [ "$INIT_SYSTEM" != "runit" ] && [ "$INIT_SYSTEM" != "systemd" ]; then
         echo "Init system not supported."
-        exit 3
+        exit 2
     fi
 
     if [ "$PACKAGE_MANAGER" != "pacman" ] && [ "$PACKAGE_MANAGER" != "xbps" ] && [ "$PACKAGE_MANAGER" != "yum" ]; then
         echo "Package manager not supported."
-        exit 4
+        exit 3
     fi
 
     if [ "$1" = "" ]; then
@@ -45,7 +45,7 @@ main () {
         elif [ "$script" = "sys" ]; then
             echo "Usage: $script standby|hibernate|poweroff|reboot"
         fi
-        exit 1
+        exit 4
     fi
 
     if [ "$script" = "pkg" ]; then
@@ -59,7 +59,7 @@ main () {
     cmd=$(printf "%b" "$possible_commands" | grep -E "^$1")
     if [ "$(echo "$cmd" | wc -l)" != "1" ]; then
         echo "Didn't recognise command: $1"
-        exit 3
+        exit 5
     fi
 
     if [ "$script" = "pkg" ]; then
@@ -90,7 +90,7 @@ main () {
             run_command "$CMD_UPDATE"
         else
             echo "Unknown command: $1"
-            exit 5
+            exit 6
         fi
     elif [ "$script" = "srv" ]; then
         if [ "$INIT_SYSTEM" = "runit" ]; then
@@ -115,7 +115,7 @@ main () {
             run_command "$CMD_STOP" "$2" 
         else
             echo "Unknown command: $1"
-            exit 5
+            exit 7
         fi
     elif [ "$script" = "sys" ]; then
         if [ "$INIT_SYSTEM" = "runit" ]; then
@@ -140,7 +140,7 @@ main () {
             run_command "$CMD_HIBERNATE" 
         else
             echo "Unknown command: $1"
-            exit 5
+            exit 8
         fi
     fi
 }
