@@ -5,14 +5,12 @@
 # Possible values are:
 #   - runit
 #   - systemd
-INIT_SYSTEM="runit"
 INIT_SYSTEM="systemd"
 # Please define your package manager.
 # Possible values are:
 #   - pacman
 #   - xbps
 #   - yum
-PACKAGE_MANAGER="xbps"
 PACKAGE_MANAGER="pacman"
 ########################################
 
