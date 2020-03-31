@@ -14,135 +14,220 @@ INIT_SYSTEM="systemd"
 PACKAGE_MANAGER="pacman"
 ########################################
 
-run_command () {
-    cmd=$(echo "$1" | sed "s/{}/$2/g")
-    echo "=> $cmd"
-    $cmd
+usage () {
+    if [ "$1" = "pkg" ]; then
+        extra=" [package]"
+    elif [ "$1" = "srv" ]; then
+        extra=" service"
+    fi
+    printf "%b" "Usage: $1 $2$extra" | tr "\n" "|"
+    printf "\n"
 }
 
 main () {
     script=$(basename -- "$0")
-    if [ "$script" != "pkg" ] && [ "$script" != "srv" ] && [ "$script" != "sys" ]; then
+    if [ "$script" != "pkg" ] \
+    && [ "$script" != "srv" ] \
+    && [ "$script" != "sys" ]; then
         echo "This script should be called as pkg, srv or sys."
         exit 1
     fi
 
-    if [ "$INIT_SYSTEM" != "runit" ] && [ "$INIT_SYSTEM" != "systemd" ]; then
+    if [ "$INIT_SYSTEM" != "runit"   ] \
+    && [ "$INIT_SYSTEM" != "systemd" ]; then
         echo "Init system not supported."
         exit 2
     fi
 
-    if [ "$PACKAGE_MANAGER" != "pacman" ] && [ "$PACKAGE_MANAGER" != "xbps" ] && [ "$PACKAGE_MANAGER" != "yum" ]; then
+    if [ "$PACKAGE_MANAGER" != "pacman" ] \
+    && [ "$PACKAGE_MANAGER" != "xbps"   ] \
+    && [ "$PACKAGE_MANAGER" != "yum"    ]; then
         echo "Package manager not supported."
         exit 3
-    fi
-
-    if [ "$1" = "" ]; then
-        if [ "$script" = "pkg" ]; then
-            echo "Usage: $script search|install|remove|update [package]"
-        elif [ "$script" = "srv" ]; then
-            echo "Usage: $script start|stop|enable|disable service"
-        elif [ "$script" = "sys" ]; then
-            echo "Usage: $script standby|hibernate|poweroff|reboot"
-        fi
-        exit 4
     fi
 
     if [ "$script" = "pkg" ]; then
         possible_commands="install\nremove\nsearch\nupdate"
     elif [ "$script" = "srv" ]; then
-        possible_commands="start\nstop\nenable\ndisable"
+        possible_commands="start\nstop\nenable\ndisable\nstatus"
     elif [ "$script" = "sys" ]; then
         possible_commands="standby\nhibernate\npoweroff\nreboot"
     fi
 
+    if [ "$1" = "" ]; then
+        usage "$script" "$possible_commands"
+        exit 4
+    fi
+
     cmd=$(printf "%b" "$possible_commands" | grep -E "^$1")
-    if [ "$(echo "$cmd" | wc -l)" != "1" ]; then
-        echo "Didn't recognise command: $1"
+    if [ "$cmd" = "" ]; then
+        usage "$script" "$possible_commands"
         exit 5
     fi
 
     if [ "$script" = "pkg" ]; then
-        if [ "$PACKAGE_MANAGER" = "pacman" ]; then
-            CMD_INSTALL="pacman -S {}"
-            CMD_SEARCH="pacman -Ss {}"
-            CMD_UNINSTALL="pacman -Rss {}"
-            CMD_UPDATE="pacman -Syu"
-        elif [ "$PACKAGE_MANAGER" = "xbps" ]; then
-            CMD_INSTALL="xbps-install {}"
-            CMD_SEARCH="xbps-query -Rs {}"
-            CMD_UNINSTALL="xbps-remove {}"
-            CMD_UPDATE="xbps-install -Su"
-        elif [ "$PACKAGE_MANAGER" = "yum" ]; then
-            CMD_INSTALL="yum install {}"
-            CMD_SEARCH="yum search {}"
-            CMD_UNINSTALL="yum remove {}"
-            CMD_UPDATE="yum update"
-        fi
-
-        if [ "$cmd" = "install" ]; then
-            run_command "$CMD_INSTALL" "$2"
-        elif [ "$cmd" = "search" ]; then
-            run_command "$CMD_SEARCH" "$2"
-        elif [ "$cmd" = "remove" ]; then
-            run_command "$CMD_UNINSTALL" "$2"
-        elif [ "$cmd" = "update" ]; then
-            run_command "$CMD_UPDATE"
+        if [ "$cmd" = "update" ]; then
+            eval "pkg_update_$PACKAGE_MANAGER"
         else
-            echo "Unknown command: $1"
-            exit 6
+            shift
+            eval "$script""_""$cmd""_""$PACKAGE_MANAGER" "$@"
         fi
     elif [ "$script" = "srv" ]; then
-        if [ "$INIT_SYSTEM" = "runit" ]; then
-            CMD_DISABLE="rm /var/service/{}"
-            CMD_ENABLE="ln -s /etc/sv/{} /var/service/"
-            CMD_START="sv start {}"
-            CMD_STOP="sv stop {}"
-        elif [ "$INIT_SYSTEM" = "systemd" ]; then
-            CMD_DISABLE="systemctl disable {}"
-            CMD_ENABLE="systemctl enable {}"
-            CMD_START="systemctl start {}"
-            CMD_STOP="systemctl stop {}"
-        fi
-
-        if [ "$cmd" = "disable" ]; then
-            run_command "$CMD_DISABLE" "$2" 
-        elif [ "$cmd" = "enable" ]; then
-            run_command "$CMD_ENABLE" "$2" 
-        elif [ "$cmd" = "start" ]; then
-            run_command "$CMD_START" "$2" 
-        elif [ "$cmd" = "stop" ]; then
-            run_command "$CMD_STOP" "$2" 
-        else
-            echo "Unknown command: $1"
-            exit 7
-        fi
+        shift
+        eval "$script""_""$cmd""_""$INIT_SYSTEM" "$@"
     elif [ "$script" = "sys" ]; then
-        if [ "$INIT_SYSTEM" = "runit" ]; then
-            CMD_POWEROFF="poweroff"
-            CMD_REBOOT="reboot"
-            CMD_STANDBY="zzz"
-            CMD_HIBERNATE="ZZZ"
-        elif [ "$INIT_SYSTEM" = "systemd" ]; then
-            CMD_POWEROFF="systemctl poweroff"
-            CMD_REBOOT="systemctl reboot"
-            CMD_STANDBY="systemctl suspend"
-            CMD_HIBERNATE="systemctl hibernate"
-        fi
-
-        if [ "$cmd" = "poweroff" ]; then
-            run_command "$CMD_POWEROFF" 
-        elif [ "$cmd" = "reboot" ]; then
-            run_command "$CMD_REBOOT" 
-        elif [ "$cmd" = "standby" ]; then
-            run_command "$CMD_STANDBY" 
-        elif [ "$cmd" = "hibernate" ]; then
-            run_command "$CMD_HIBERNATE" 
-        else
-            echo "Unknown command: $1"
-            exit 8
-        fi
+        echo "$script""_""$cmd""_""$INIT_SYSTEM"
     fi
+}
+
+pkg_install_pacman () {
+    echo "=> pacman -S $1"
+    pacman -S "$1"
+}
+
+pkg_install_xbps () {
+    echo "=> xbps-install -S $1"
+    xbps-install -S "$1"
+}
+
+pkg_install_yum () {
+    echo "=> yum install $1"
+    yum install "$1"
+}
+
+pkg_remove_pacman () {
+    echo "=> pacman -Rss $1"
+    pacman -Rss "$1"
+}
+
+pkg_remove_xbps () {
+    echo "=> xbps-remove -R $1"
+    xbps-remove -R "$1"
+}
+
+pkg_remove_yum () {
+    echo "=> yum remove $1"
+    yum remove "$1"
+}
+
+pkg_search_pacman () {
+    echo "=> pacman -Ss $1"
+    pacman -Ss "$1"
+}
+
+pkg_search_xbps () {
+    echo "=> xbps-query -Rs $1"
+    xbps-query -Rs "$1"
+}
+
+pkg_search_yum () {
+    echo "=> yum search $1"
+    yum search "$1"
+}
+
+pkg_update_pacman () {
+    echo "=> pacman -Syu"
+    pacman -Syu
+}
+
+pkg_update_xbps () {
+    echo "=> xbps-install -Su"
+    xbps-install -Su
+}
+
+pkg_update_yum () {
+    echo "=> yum update"
+    yum update
+}
+
+srv_disable_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+srv_disable_systemd () {
+    echo "=> systemctl disable $1"
+    systemctl disable "$1"
+}
+
+srv_enable_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+srv_enable_systemd () {
+    echo "=> systemctl enable $1"
+    systemctl enable "$1"
+}
+
+srv_start_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+srv_start_systemd () {
+    echo "=> systemctl start $1"
+    systemctl start "$1"
+}
+
+srv_status_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+srv_status_systemd () {
+    echo "=> systemctl status $1"
+    systemctl status "$1"
+}
+
+srv_stop_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+srv_stop_systemd () {
+    echo "=> systemctl stop $1"
+    systemctl stop "$1"
+}
+
+sys_hibernate_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+sys_hibernate_systemd () {
+    echo "=> systemctl hibernate"
+    systemctl hibernate
+}
+
+sys_poweroff_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+sys_poweroff_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+sys_reboot_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+sys_reboot_systemd () {
+    echo "=> systemctl reboot"
+    systemctl reboot
+}
+
+sys_standby_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+sys_standby_systemd () {
+    echo "=> systemctl suspend"
+    systemctl suspend
 }
 
 main "$@"
