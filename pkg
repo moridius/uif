@@ -76,7 +76,7 @@ main () {
         shift
         eval "$script""_""$cmd""_""$INIT_SYSTEM" "$@"
     elif [ "$script" = "sys" ]; then
-        echo "$script""_""$cmd""_""$INIT_SYSTEM"
+        eval "$script""_""$cmd""_""$INIT_SYSTEM"
     fi
 }
 
