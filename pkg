@@ -49,7 +49,7 @@ main () {
     if [ "$script" = "pkg" ]; then
         possible_commands="install\nremove\nsearch\nupdate"
     elif [ "$script" = "srv" ]; then
-        possible_commands="start\nstop\nenable\ndisable\nstatus"
+        possible_commands="start\nstop\nrestart\nenable\ndisable\nstatus"
     elif [ "$script" = "sys" ]; then
         possible_commands="standby\nhibernate\npoweroff\nreboot"
     fi
@@ -158,6 +158,16 @@ srv_enable_runit () {
 srv_enable_systemd () {
     echo "=> systemctl enable $1"
     systemctl enable "$1"
+}
+
+srv_restart_runit () {
+    echo "Not implemented."
+    exit 6
+}
+
+srv_restart_systemd () {
+    echo "=> systemctl restart $1"
+    systemctl restart "$1"
 }
 
 srv_start_runit () {
