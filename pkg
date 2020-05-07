@@ -15,6 +15,8 @@ INIT_SYSTEM="systemd"
 PACKAGE_MANAGER="pacman"
 ########################################
 
+DRY=false
+
 usage () {
     if [ "$1" = "pkg" ]; then
         extra=" [package]"
@@ -84,83 +86,106 @@ main () {
 
 pkg_install_apt () {
     echo "=> apt install $*"
+    $DRY && exit 9
     apt install "$@"
 }
 
 pkg_install_pacman () {
     echo "=> pacman -S $*"
+    $DRY && exit 9
     pacman -S "$@"
 }
 
 pkg_install_xbps () {
     echo "=> xbps-install -S $*"
+    $DRY && exit 9
     xbps-install -S "$@"
 }
 
 pkg_install_yum () {
     echo "=> yum install $*"
+    $DRY && exit 9
     yum install "$@"
 }
 
 pkg_remove_apt () {
     echo "=> apt remove $*"
+    $DRY && exit 9
     apt remove "$@"
 }
 
 pkg_remove_pacman () {
     echo "=> pacman -Rss $*"
+    $DRY && exit 9
     pacman -Rss "$@"
 }
 
 pkg_remove_xbps () {
     echo "=> xbps-remove -R $*"
+    $DRY && exit 9
     xbps-remove -R "$@"
 }
 
 pkg_remove_yum () {
     echo "=> yum remove $*"
+    $DRY && exit 9
     yum remove "$@"
 }
 
 pkg_search_apt () {
     echo "=> apt search $*"
+    $DRY && exit 9
     apt search "$@"
 }
 
 pkg_search_pacman () {
     echo "=> pacman -Ss $*"
+    $DRY && exit 9
     pacman -Ss "$@"
 }
 
 pkg_search_xbps () {
     echo "=> xbps-query -Rs $*"
+    $DRY && exit 9
     xbps-query -Rs "$@"
 }
 
 pkg_search_yum () {
     echo "=> yum search $*"
+    $DRY && exit 9
     yum search "$@"
 }
 
 pkg_update_apt () {
     echo "=> apt update"
-    apt update
+    if [ "$DRY" = "0" ]; then
+        apt update
+    else
+        exit 9
+    fi
     echo "=> apt upgrade"
-    apt upgrade
+    if [ "$DRY" = "0" ]; then
+        apt upgrade
+    else
+        exit 9
+    fi
 }
 
 pkg_update_pacman () {
     echo "=> pacman -Syu"
+    $DRY && exit 9
     pacman -Syu
 }
 
 pkg_update_xbps () {
     echo "=> xbps-install -Su"
+    $DRY && exit 9
     xbps-install -Su
 }
 
 pkg_update_yum () {
     echo "=> yum update"
+    $DRY && exit 9
     yum update
 }
 
@@ -171,6 +196,7 @@ srv_disable_runit () {
 
 srv_disable_systemd () {
     echo "=> systemctl disable $1"
+    $DRY && exit 9
     systemctl disable "$1"
 }
 
@@ -181,6 +207,7 @@ srv_enable_runit () {
 
 srv_enable_systemd () {
     echo "=> systemctl enable $1"
+    $DRY && exit 9
     systemctl enable "$1"
 }
 
@@ -191,6 +218,7 @@ srv_restart_runit () {
 
 srv_restart_systemd () {
     echo "=> systemctl restart $1"
+    $DRY && exit 9
     systemctl restart "$1"
 }
 
@@ -201,6 +229,7 @@ srv_start_runit () {
 
 srv_start_systemd () {
     echo "=> systemctl start $1"
+    $DRY && exit 9
     systemctl start "$1"
 }
 
@@ -211,6 +240,7 @@ srv_status_runit () {
 
 srv_status_systemd () {
     echo "=> systemctl status $1"
+    $DRY && exit 9
     systemctl status "$1"
 }
 
@@ -221,6 +251,7 @@ srv_stop_runit () {
 
 srv_stop_systemd () {
     echo "=> systemctl stop $1"
+    $DRY && exit 9
     systemctl stop "$1"
 }
 
@@ -231,6 +262,7 @@ sys_hibernate_runit () {
 
 sys_hibernate_systemd () {
     echo "=> systemctl hibernate"
+    $DRY && exit 9
     systemctl hibernate
 }
 
@@ -251,6 +283,7 @@ sys_reboot_runit () {
 
 sys_reboot_systemd () {
     echo "=> systemctl reboot"
+    $DRY && exit 9
     systemctl reboot
 }
 
@@ -261,6 +294,7 @@ sys_standby_runit () {
 
 sys_standby_systemd () {
     echo "=> systemctl suspend"
+    $DRY && exit 9
     systemctl suspend
 }
 
