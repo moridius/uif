@@ -8,6 +8,7 @@
 INIT_SYSTEM="systemd"
 # Please define your package manager.
 # Possible values are:
+#   - apt
 #   - pacman
 #   - xbps
 #   - yum
@@ -39,7 +40,8 @@ main () {
         exit 2
     fi
 
-    if [ "$PACKAGE_MANAGER" != "pacman" ] \
+    if [ "$PACKAGE_MANAGER" != "apt"    ] \
+    && [ "$PACKAGE_MANAGER" != "pacman" ] \
     && [ "$PACKAGE_MANAGER" != "xbps"   ] \
     && [ "$PACKAGE_MANAGER" != "yum"    ]; then
         echo "Package manager not supported."
@@ -80,6 +82,11 @@ main () {
     fi
 }
 
+pkg_install_apt () {
+    echo "=> apt install $1"
+    apt install "$1"
+}
+
 pkg_install_pacman () {
     echo "=> pacman -S $1"
     pacman -S "$1"
@@ -93,6 +100,11 @@ pkg_install_xbps () {
 pkg_install_yum () {
     echo "=> yum install $1"
     yum install "$1"
+}
+
+pkg_remove_apt () {
+    echo "=> apt remove $1"
+    apt remove "$1"
 }
 
 pkg_remove_pacman () {
@@ -110,6 +122,11 @@ pkg_remove_yum () {
     yum remove "$1"
 }
 
+pkg_search_apt () {
+    echo "=> apt search $1"
+    apt search "$1"
+}
+
 pkg_search_pacman () {
     echo "=> pacman -Ss $1"
     pacman -Ss "$1"
@@ -123,6 +140,13 @@ pkg_search_xbps () {
 pkg_search_yum () {
     echo "=> yum search $1"
     yum search "$1"
+}
+
+pkg_update_apt () {
+    echo "=> apt update"
+    apt update
+    echo "=> apt upgrade"
+    apt upgrade
 }
 
 pkg_update_pacman () {
