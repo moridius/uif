@@ -1,7 +1,5 @@
 # UIF
 
-A wrapper script to run common tasks on different Linux distributions.
-
 I work with different distributions and it's annoying for me that common tasks have a different syntax on every system:
 - Search for a package (is it apt or pacman on this box?)
 - Install updates
