@@ -271,9 +271,10 @@ sys_poweroff_runit () {
     exit 6
 }
 
-sys_poweroff_runit () {
-    echo "Not implemented."
-    exit 6
+sys_poweroff_systemd () {
+    echo "=> systemctl poweroff"
+    $DRY && exit 9
+    systemctl poweroff
 }
 
 sys_reboot_runit () {
