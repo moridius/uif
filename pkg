@@ -83,63 +83,63 @@ main () {
 }
 
 pkg_install_apt () {
-    echo "=> apt install $1"
-    apt install "$1"
+    echo "=> apt install $*"
+    apt install "$@"
 }
 
 pkg_install_pacman () {
-    echo "=> pacman -S $1"
-    pacman -S "$1"
+    echo "=> pacman -S $*"
+    pacman -S "$@"
 }
 
 pkg_install_xbps () {
-    echo "=> xbps-install -S $1"
-    xbps-install -S "$1"
+    echo "=> xbps-install -S $*"
+    xbps-install -S "$@"
 }
 
 pkg_install_yum () {
-    echo "=> yum install $1"
-    yum install "$1"
+    echo "=> yum install $*"
+    yum install "$@"
 }
 
 pkg_remove_apt () {
-    echo "=> apt remove $1"
-    apt remove "$1"
+    echo "=> apt remove $*"
+    apt remove "$@"
 }
 
 pkg_remove_pacman () {
-    echo "=> pacman -Rss $1"
-    pacman -Rss "$1"
+    echo "=> pacman -Rss $*"
+    pacman -Rss "$@"
 }
 
 pkg_remove_xbps () {
-    echo "=> xbps-remove -R $1"
-    xbps-remove -R "$1"
+    echo "=> xbps-remove -R $*"
+    xbps-remove -R "$@"
 }
 
 pkg_remove_yum () {
-    echo "=> yum remove $1"
-    yum remove "$1"
+    echo "=> yum remove $*"
+    yum remove "$@"
 }
 
 pkg_search_apt () {
-    echo "=> apt search $1"
-    apt search "$1"
+    echo "=> apt search $*"
+    apt search "$@"
 }
 
 pkg_search_pacman () {
-    echo "=> pacman -Ss $1"
-    pacman -Ss "$1"
+    echo "=> pacman -Ss $*"
+    pacman -Ss "$@"
 }
 
 pkg_search_xbps () {
-    echo "=> xbps-query -Rs $1"
-    xbps-query -Rs "$1"
+    echo "=> xbps-query -Rs $*"
+    xbps-query -Rs "$@"
 }
 
 pkg_search_yum () {
-    echo "=> yum search $1"
-    yum search "$1"
+    echo "=> yum search $*"
+    yum search "$@"
 }
 
 pkg_update_apt () {
