@@ -258,8 +258,9 @@ sys_hibernate_systemd () {
 }
 
 sys_poweroff_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> poweroff"
+    $DRY && exit 9
+    poweroff
 }
 
 sys_poweroff_systemd () {
@@ -269,8 +270,9 @@ sys_poweroff_systemd () {
 }
 
 sys_reboot_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> reboot"
+    $DRY && exit 9
+    reboot
 }
 
 sys_reboot_systemd () {
