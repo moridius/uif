@@ -157,18 +157,9 @@ pkg_search_yum () {
 }
 
 pkg_update_apt () {
-    echo "=> apt update"
-    if [ "$DRY" = "0" ]; then
-        apt update
-    else
-        exit 9
-    fi
-    echo "=> apt upgrade"
-    if [ "$DRY" = "0" ]; then
-        apt upgrade
-    else
-        exit 9
-    fi
+    echo "=> apt update && apt upgrade"
+    $DRY && exit 9
+    apt update && apt upgrade
 }
 
 pkg_update_pacman () {
