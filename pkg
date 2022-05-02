@@ -181,8 +181,9 @@ pkg_update_yum () {
 }
 
 srv_disable_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> rm /var/service/$1"
+    $DRY && exit 9
+    rm "/var/service/$1"
 }
 
 srv_disable_systemd () {
@@ -192,8 +193,9 @@ srv_disable_systemd () {
 }
 
 srv_enable_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> ln -s /etc/sv/$1 /var/service/"
+    $DRY && exit 9
+    ln -s "/etc/sv/$1" "/var/service/"
 }
 
 srv_enable_systemd () {
@@ -203,8 +205,9 @@ srv_enable_systemd () {
 }
 
 srv_restart_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> sv restart $1"
+    $DRY && exit 9
+    sv restart "$1"
 }
 
 srv_restart_systemd () {
@@ -214,8 +217,9 @@ srv_restart_systemd () {
 }
 
 srv_start_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> sv up $1"
+    $DRY && exit 9
+    sv up "$1"
 }
 
 srv_start_systemd () {
@@ -225,8 +229,9 @@ srv_start_systemd () {
 }
 
 srv_status_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> sv status $1"
+    $DRY && exit 9
+    sv status "$1"
 }
 
 srv_status_systemd () {
@@ -236,8 +241,9 @@ srv_status_systemd () {
 }
 
 srv_stop_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> sv down $1"
+    $DRY && exit 9
+    sv down "$1"
 }
 
 srv_stop_systemd () {
@@ -247,8 +253,9 @@ srv_stop_systemd () {
 }
 
 sys_hibernate_runit () {
-    echo "Not implemented."
-    exit 6
+    echo "=> echo disk > /sys/power/state"
+    $DRY && exit 9
+    echo disk > /sys/power/state
 }
 
 sys_hibernate_systemd () {
